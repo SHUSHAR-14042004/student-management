@@ -15,3 +15,18 @@ exports.deleteStudent = (req, res) => {
   students = students.filter(s => s.id != id);
   res.json({ message: "Student deleted" });
 };
+exports.updateStudent = (req, res) => {
+  const id = req.params.id;
+  const updatedData = req.body;
+
+  let student = students.find(s => s.id == id);
+
+  if (student) {
+    student.name = updatedData.name || student.name;
+    student.course = updatedData.course || student.course;
+
+    res.json(student);
+  } else {
+    res.status(404).json({ message: "Student not found" });
+  }
+};

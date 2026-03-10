@@ -30,3 +30,15 @@ exports.updateStudent = (req, res) => {
     res.status(404).json({ message: "Student not found" });
   }
 };
+
+exports.getStudentById = (req, res) => {
+  const id = req.params.id;
+
+  const student = students.find(s => s.id == id);
+
+  if (student) {
+    res.json(student);
+  } else {
+    res.status(404).json({ message: "Student not found" });
+  }
+};

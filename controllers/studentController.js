@@ -42,3 +42,16 @@ exports.getStudentById = (req, res) => {
     res.status(404).json({ message: "Student not found" });
   }
 };
+exports.searchStudents = (req, res) => {
+  const { name } = req.query;
+
+  const result = students.filter(student =>
+    student.name.toLowerCase().includes(name.toLowerCase())
+  );
+
+  if (result.length === 0) {
+    return res.status(404).json({ message: "Student not found" });
+  }
+
+  res.json(result);
+};

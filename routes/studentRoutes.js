@@ -7,14 +7,18 @@ const {
   getStudentById,
   addStudent,
   updateStudent,
-  deleteStudent
+  deleteStudent,
+  searchStudents
 } = require("../controllers/studentController");
 const validateStudent = require("../middleware/validateStudent");
 
+
 router.get("/students", getStudents);
+router.get("/students/search", searchStudents);
 router.get("/students/:id", getStudentById);
 router.post("/students", validateStudent, addStudent);
-router.delete("/students/:id", deleteStudent);
 router.put("/students/:id", validateStudent, updateStudent);
+router.delete("/students/:id", deleteStudent);
+
 
 module.exports = router;

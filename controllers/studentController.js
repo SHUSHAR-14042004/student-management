@@ -1,20 +1,27 @@
+const Student = require("../models/Student");
 let students = require("../data/students");
 
-exports.getStudents = (req, res) => {
+exports.getStudents = async (req, res) => {
+  const students = await Student.find();
   res.json(students);
 };
 
-exports.addStudent = (req, res) => {
-  const student = req.body;
-  students.push(student);
-  res.json(student);
+exports.addStudent = async (req, res) => {
+  const student = new Student(req.body);
+
+  await student.save();
+
+  res.status(201).json(student);
 };
 
-exports.deleteStudent = (req, res) => {
-  const id = req.params.id;
-  students = students.filter(s => s.id != id);
-  res.json({ message: "Student deleted" });
+exports.deleteStudent = async (req, res) => {
+
+  await Student.findByIdAndDelete(req.params.id);
+
+  res.json({ message: "Student deleted successfully" });
+
 };
+
 exports.updateStudent = (req, res) => {
   const id = req.params.id;
   const updatedData = req.body;
@@ -55,3 +62,6 @@ exports.searchStudents = (req, res) => {
 
   res.json(result);
 };
+
+
+

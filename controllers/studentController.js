@@ -1,66 +1,80 @@
 const Student = require("../models/Student");
-let students = require("../data/students");
+
 
 exports.getStudents = async (req, res) => {
-  const students = await Student.find();
-  res.json(students);
+  try {
+    const students = await Student.find();
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.addStudent = async (req, res) => {
-  const student = new Student(req.body);
-
-  await student.save();
-
-  res.status(201).json(student);
+  try {
+    const student = new Student(req.body);
+    const savedStudent = await student.save();
+    res.status(201).json(savedStudent);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 exports.deleteStudent = async (req, res) => {
-
-  await Student.findByIdAndDelete(req.params.id);
-
-  res.json({ message: "Student deleted successfully" });
-
+  try {
+    await Student.findByIdAndDelete(req.params.id);
+    res.json({ message: "Student deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-exports.updateStudent = (req, res) => {
-  const id = req.params.id;
-  const updatedData = req.body;
+exports.updateStudent = async (req, res) => {
+  try {
+    const updatedStudent = await Student.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
 
-  let student = students.find(s => s.id == id);
+    res.json(updatedStudent);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-  if (student) {
-    student.name = updatedData.name || student.name;
-    student.course = updatedData.course || student.course;
+exports.getStudentById = async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id);
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
 
     res.json(student);
-  } else {
-    res.status(404).json({ message: "Student not found" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-exports.getStudentById = (req, res) => {
-  const id = req.params.id;
+exports.searchStudents = async (req, res) => {
+  try {
 
-  const student = students.find(s => s.id == id);
+    const { name } = req.query;
 
-  if (student) {
-    res.json(student);
-  } else {
-    res.status(404).json({ message: "Student not found" });
+    const students = await Student.find({
+      name: { $regex: name, $options: "i" }
+    });
+
+    if (students.length === 0) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.json(students);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-};
-exports.searchStudents = (req, res) => {
-  const { name } = req.query;
-
-  const result = students.filter(student =>
-    student.name.toLowerCase().includes(name.toLowerCase())
-  );
-
-  if (result.length === 0) {
-    return res.status(404).json({ message: "Student not found" });
-  }
-
-  res.json(result);
 };
 
 

@@ -3,8 +3,20 @@ const Student = require("../models/Student");
 
 exports.getStudents = async (req, res) => {
   try {
-    const students = await Student.find();
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const sort = req.query.sort || "name";
+
+    const skip = (page - 1) * limit;
+
+    const students = await Student.find()
+      .sort(sort)
+      .skip(skip)
+      .limit(limit);
+
     res.json(students);
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

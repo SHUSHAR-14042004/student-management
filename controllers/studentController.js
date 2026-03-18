@@ -7,15 +7,28 @@ exports.getStudents = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
     const sort = req.query.sort || "name";
+    const course = req.query.course;
 
-    const skip = (page - 1) * limit;
+    const query = {};
 
-    const students = await Student.find()
+    // Filtering
+    if (course) {
+      query.course = course;
+    }
+
+    const total = await Student.countDocuments(query);
+
+    const students = await Student.find(query)
       .sort(sort)
-      .skip(skip)
+      .skip((page - 1) * limit)
       .limit(limit);
 
-    res.json(students);
+    res.json({
+      total,
+      page,
+      limit,
+      data: students
+    });
 
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -34,8 +47,17 @@ exports.addStudent = async (req, res) => {
 
 exports.deleteStudent = async (req, res) => {
   try {
-    await Student.findByIdAndDelete(req.params.id);
-    res.json({ message: "Student deleted successfully" });
+
+    const student = await Student.findByIdAndDelete(req.params.id);
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.json({
+      message: "Student deleted successfully"
+    });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -43,13 +65,22 @@ exports.deleteStudent = async (req, res) => {
 
 exports.updateStudent = async (req, res) => {
   try {
-    const updatedStudent = await Student.findByIdAndUpdate(
+
+    const student = await Student.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
     );
 
-    res.json(updatedStudent);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.json({
+      message: "Student updated successfully",
+      data: student
+    });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
